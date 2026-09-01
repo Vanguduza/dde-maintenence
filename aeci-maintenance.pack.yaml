@@ -3,7 +3,7 @@ kind: VerticalCustomerPack
 metadata:
   id: aeci-maintenance-zimbabwe
   name: AECI Maintenance Operations System
-  version: 1.0.0
+  version: 1.1.0
   status: implementation-baseline
   date: 2026-09-01
   sourceOfTruth: AECI_Maintenance_Operations_System_Master_Plan_v1.md
@@ -14,26 +14,73 @@ spec:
     noCodeFork: true
   principles:
     safetyNative: true
+    securityByDefault: true
     offlineFirst: true
     appendOnlyOperationalTruth: true
     canonicalIdentity: true
     adapterOnlyExternalIntegrations: true
     aiIsNotSystemOfRecord: true
     externalContractsDoNotBlockCoreBuild: true
+    inheritAllApplicableDDEMaintenanceCapabilities: true
+    silenceIsNotExclusion: true
+
+  security:
+    benchmark: SAP_SUCCESSFACTORS_OR_STRONGER_WHERE_APPLICABLE
+    defaultDeny: true
+    enterpriseIdentity:
+      protocols: [SAML2, OIDC]
+      provisioningAdapter: required-seam
+      mfaViaEnterpriseIdP: true
+      stepUpAuthentication: true
+    authorization:
+      models: [RBAC, ABAC, OBJECT_SCOPE, SITE_SCOPE, DATA_CLASSIFICATION, COMPETENCY_AUTHORIZATION]
+      competencySeparateFromRBAC: true
+      exportSeparateFromView: true
+    dataClassification: [PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED, HIGHLY_RESTRICTED]
+    encryption:
+      inTransit: required
+      databaseAtRest: required
+      objectStorageAtRest: required
+      backups: required
+      offlineCache: required
+      kmsHsmReady: true
+      customerManagedKeyOption: true
+    audit:
+      appendOnly: true
+      tamperEvident: true
+      normalAdminCannotDelete: true
+    retention:
+      perRecordClass: true
+      legalHold: true
+      purgePreview: true
+      purgeAudit: true
+      dualControlOption: true
+    mobile:
+      scopeLimitedOfflineCache: true
+      secureStorage: true
+      compromisedDevicePolicy: true
+      remoteRevocation: true
+    ai:
+      aclAwareRetrieval: true
+      classificationAwareIndexing: true
+      unrestrictedExternalModelDataTransfer: false
+
   boundedContexts:
     - id: asset-registry
-      owns: [asset, component, asset_configuration, meter, genealogy]
+      owns: [site_asset_register, asset, component, asset_configuration, meter, genealogy, asset_responsibility_assignment, technician_posting]
     - id: work-management
-      dependsOn: [asset-registry, safety-permit, workforce-competency]
-      owns: [work_request, defect, work_order, job_plan, task_execution, return_to_service]
+      dependsOn: [asset-registry, safety-permit, workforce-competency, documents-forms]
+      owns: [work_intent, work_origin, work_request, defect, work_order, job_plan, task_execution, return_to_service, rework_relationship]
     - id: planning-scheduling
-      dependsOn: [work-management, workforce-competency, stores-procurement]
-      owns: [backlog_plan, schedule, capacity_allocation]
+      dependsOn: [work-management, workforce-competency, stores-procurement, tools-test-equipment]
+      owns: [backlog_plan, schedule, capacity_allocation, reporting_obligation]
     - id: safety-permit
       dependsOn: [asset-registry, workforce-competency]
       owns: [risk_assessment, ppe_policy, isolation_plan, loto_record, permit_reference, safety_stop]
     - id: workforce-competency
       owns: [role_scope, competency, authorization, roster_eligibility]
+    - id: tools-test-equipment
+      owns: [tool, toolbox, tool_custody, tool_audit, calibration_status, quarantine, calibration_impact_set]
     - id: stores-procurement
       owns: [item_master, inventory_ledger, reservation, issue_return, requisition, purchase_order, receipt]
     - id: workshop-repairables
@@ -41,7 +88,7 @@ spec:
       owns: [workshop_job, strip_inspection, rebuild_record, qa_release]
     - id: reliability-engineering
       dependsOn: [asset-registry, work-management, condition-monitoring]
-      owns: [failure_analysis, rca, pm_change_proposal, reliability_model, defect_elimination]
+      owns: [failure_analysis, recurrence, bad_actor, rca, pm_change_proposal, reliability_model, defect_elimination, maintenance_induced_failure, no_fault_found]
     - id: fleet-compliance
       dependsOn: [asset-registry, workforce-competency]
       owns: [road_credential, road_readiness, vehicle_overlay]
@@ -51,19 +98,26 @@ spec:
     - id: condition-monitoring
       dependsOn: [asset-registry]
       owns: [telemetry_channel, reading, quality_flag, condition_rule]
-    - id: documents-engineering-change
+    - id: documents-forms
       dependsOn: [asset-registry]
-      owns: [controlled_document, document_revision, engineering_change, applicability]
+      owns: [controlled_document, document_revision, donor_document, donor_revision, form_schema, coordinate_map, form_instance, generated_record, fidelity_test_run, engineering_change, applicability]
     - id: incident-capa
       dependsOn: [work-management, safety-permit, asset-registry]
-      owns: [incident, investigation, capa_action]
+      owns: [incident, unusual_occurrence, near_miss, investigation, capa_action]
+    - id: notifications-obligations
+      dependsOn: [planning-scheduling, work-management, documents-forms]
+      owns: [notification_rule, notification_instance, reporting_obligation]
+    - id: blast-operations-reporting
+      dependsOn: [asset-registry, work-management, documents-forms, workforce-competency]
+      owns: [blast_record, blast_charge_entry, blast_quality_check, blast_event_log_entry, blast_equipment_metric, blast_derived_metric, blast_report_record]
     - id: reporting-economics
-      owns: [kpi_definition, kpi_snapshot, cost_event, economics_lineage]
+      owns: [kpi_definition, kpi_snapshot, technician_performance_snapshot, cost_event, economics_lineage]
     - id: ai-rag
-      dependsOn: [documents-engineering-change, work-management, asset-registry, reliability-engineering]
+      dependsOn: [documents-forms, work-management, asset-registry, reliability-engineering]
       owns: [retrieval_index, ai_recommendation, evaluation_result]
     - id: integration-edge
       owns: [connector_config, sync_cursor, edge_buffer, dead_letter]
+
   assetClasses:
     - MMU
     - MCU
@@ -77,12 +131,39 @@ spec:
     - EVDS
     - WORKSHOP_EQUIPMENT
     - CALIBRATION_EQUIPMENT
+
+  assetRegister:
+    perSite: true
+    myAssetsEnabled: true
+    myAssetsScopeSources: [CURRENT_SITE_POSTING, TEAM_CRAFT_RESPONSIBILITY, EXPLICIT_ASSET_ASSIGNMENT, TEMPORARY_DELEGATION]
+    requiredAssetPassportFields:
+      - image
+      - asset_id
+      - serial_number
+      - technical_condition
+      - operational_state
+      - maintenance_state
+      - safety_compliance_state
+      - notes
+      - maintenance_history
+      - planned_maintenance
+      - open_issues
+      - manuals_procedures
+
   readiness:
     states: [GREEN, AMBER, RED, BLACK]
     hardStopPrecedence: true
     explainable: true
     allowGenericOverride: false
+
   workOrder:
+    originTypes:
+      - SCHEDULED_PLANNED
+      - TECHNICIAN_BREAKDOWN
+      - TECHNICIAN_AUTONOMOUS_MAINTENANCE
+      - SUPERVISOR_MANAGEMENT_CREATED
+    sourceProvenanceImmutableAudited: true
+    allOriginsConvergeToCanonicalJobPack: true
     states:
       - REQUESTED
       - TRIAGED
@@ -100,47 +181,140 @@ spec:
       - REJECTED
       - DEFERRED
       - STOPPED_FOR_SAFETY
+
+  digitalJobCardPack:
+    offlineRequired: true
+    revisionPinned: true
+    includes:
+      - work_order
+      - approved_procedure
+      - job_plan
+      - risk_assessment
+      - ppe
+      - permit
+      - loto_isolation
+      - competency
+      - tools_test_equipment
+      - parts_consumables
+      - drawings_manuals
+      - evidence
+      - functional_test
+      - return_to_service_verification
+
+  notifications:
+    engine: rule-and-obligation-based
+    channels: [IN_APP, PUSH, EMAIL]
+    privacyMinimizedPreview: true
+    acknowledgementDoesNotCloseSource: true
+    sources:
+      - PM_DUE
+      - CALIBRATION_DUE
+      - TRIP_TEST_DUE
+      - DAILY_VEHICLE_CHECK_DUE
+      - TIMESHEET_DUE
+      - REPORT_DUE
+      - WORK_ASSIGNED
+      - BREAKDOWN_CREATED
+      - PARTS_TOOL_READY
+      - PERMIT_ACCESS_CHANGE
+      - FOLLOW_UP_DUE
+      - DEFERRED_DEFECT_REVIEW
+      - COMPETENCY_EXPIRY
+      - TOOL_AUDIT_CALIBRATION_DUE
+      - APPROVAL_REQUEST
+      - UNUSUAL_OCCURRENCE_NEAR_MISS
+      - RECURRENCE_ESCALATION
+      - READINESS_SERVICE_RISK
+      - BLAST_REPORT_DUE
+
+  donorPdfEngine:
+    originalImmutable: true
+    sandboxParsing: true
+    genericSchemaDrivenCapture: true
+    coordinateMapVersioned: true
+    exactDonorOfficialOutput: true
+    structuredPayloadAndPdfDualRetention: true
+    signatureIdentityBinding: true
+    fidelityTests: [PAGE_DIMENSION, COORDINATE_TOLERANCE, GOLDEN_RENDER, PIXEL_DIFF, DOCUMENT_CONTROLLER_APPROVAL]
+    initialFamilies:
+      - MAINTENANCE_JOB_CARD
+      - TIMESHEET
+      - SCHEDULED_MAINTENANCE
+      - TRIP_TEST
+      - CALIBRATION
+      - DAILY_VEHICLE_CHECKLIST
+      - EQUIPMENT_INSPECTION
+      - AUTONOMOUS_MAINTENANCE
+      - UNUSUAL_OCCURRENCE
+      - NEAR_MISS
+      - RISK_ASSESSMENT
+      - TOOL_AUDIT
+      - BREAKDOWN_REPORT
+      - BLAST_CHARGE_RECORD
+      - BLAST_QUALITY_RECORD
+      - BLAST_EVENT_LOG
+      - BLAST_CONSOLIDATED_REPORT
+
+  blastModule:
+    applicability: AUTHORIZED_SURFACE_SITES
+    uncontrolledBlastDesign: false
+    accessRequires: [ROLE, SITE_SCOPE, CONFIGURED_AUTHORIZATION]
+    capabilities:
+      - BLAST_EVENT_IDENTITY
+      - CHARGE_PER_HOLE_CAPTURE
+      - DENSITY_QUALITY_TRACKER
+      - EVENT_LOGGER
+      - EQUIPMENT_SERVICE_METRICS
+      - MAINTENANCE_BREAKDOWN_LINK
+      - CONSOLIDATED_DONOR_REPORT
+      - APPROVED_DERIVED_METRICS
+    approvedFormulaRequired: true
+    missingFormulaBehavior: NOT_CALCULATED
+    offlineRequired: true
+
   repairable:
-    states:
-      - SERVICEABLE_STOCK
-      - RESERVED
-      - INSTALLED
-      - FAILED
-      - REMOVED
-      - IN_TRANSIT
-      - AWAITING_REPAIR
-      - IN_REPAIR
-      - AWAITING_TEST
-      - QUARANTINED
-      - SCRAPPED
+    states: [SERVICEABLE_STOCK, RESERVED, INSTALLED, FAILED, REMOVED, IN_TRANSIT, AWAITING_REPAIR, IN_REPAIR, AWAITING_TEST, QUARANTINED, SCRAPPED]
+
   documents:
     states: [DRAFT, REVIEW, APPROVED, EFFECTIVE, SUPERSEDED, ARCHIVED]
     ragPrimaryEligibleStates: [EFFECTIVE]
     preserveHistoricalRevision: true
+    finalizedRecordsImmutable: true
+    correctionModel: AMENDMENT_OR_SUPERSEDING_RECORD
+
   field:
     offlineCriticalFlows:
       - assigned_work
+      - my_assets
       - asset_passport_subset
       - controlled_procedure_subset
+      - donor_forms
       - safety_prerequisites
       - task_execution
       - measurements
       - evidence
       - signatures
       - shift_handover
+      - authorized_blast_capture
     conflictClasses:
-      appendSafe: [measurement, photo, comment, evidence]
+      appendSafe: [measurement, photo, comment, evidence, blast_event_log_entry]
       optimisticVersioned: [work_metadata, assignment]
-      ledgerReconciliation: [inventory]
-      authoritySensitive: [safety_approval, competency]
-      sequenceConstrained: [component_install_remove, workshop_state]
+      ledgerReconciliation: [inventory, tool_custody]
+      authoritySensitive: [safety_approval, competency, document_approval]
+      sequenceConstrained: [component_install_remove, workshop_state, finalized_record]
+
   ai:
     sourceGrounded: true
     citationsRequiredForTechnicalGuidance: true
+    aclAware: true
+    classificationAware: true
     cannotApproveSafety: true
     cannotOverrideLegalStop: true
+    cannotReleaseAssetToService: true
     cannotCommitProcurementSpend: true
+    cannotInventControlledTechnicalValues: true
     distinguishObservedAndDerived: true
+
   releases:
     - id: A
       name: foundation-master-data
@@ -165,16 +339,39 @@ spec:
     - id: H
       name: ai-rag-copilots
       dependsOn: [B, E]
+
+  crossPhaseTracks:
+    - id: DDE_CAPABILITY_INHERITANCE
+      issue: 11
+    - id: ENTERPRISE_SECURITY_RECORDS
+      issue: 12
+    - id: DONOR_PDF_FIDELITY
+      issue: 13
+    - id: FIELD_ASSETS_WORK_NOTIFICATIONS_BLAST
+      issue: 14
+
   acceptance:
-    catalog: AECI_Maintenance_Acceptance_Test_Catalog_v1.md
+    catalogs:
+      - AECI_Maintenance_Acceptance_Test_Catalog_v1.md
+      - AECI_Maintenance_Operational_Workflow_Acceptance_Addendum_v1.md
+      - AECI_Security_Forms_Field_Blast_Acceptance_Addendum_v1.md
     requireP0Pass: true
     requireP1PassOrSignedWaiver: true
     greenVerticalSliceMeansFeatureComplete: false
+    safetyAndSecurityP0AbsoluteBlockers: true
+
   authorityDocuments:
+    - AECI_Enterprise_Security_Data_Protection_Records_Standard_v1.md
     - AECI_Maintenance_Operations_System_Master_Plan_v1.md
+    - AECI_Maintenance_DDE_Full_Capability_Inheritance_Spec_v1.md
+    - AECI_Donor_PDF_Forms_Records_Fidelity_Engine_v1.md
+    - AECI_Field_Operations_Assets_Work_Notifications_Blast_Module_v1.md
     - AECI_Maintenance_Implementation_Realisation_Pack_v1.md
     - AECI_Maintenance_RBAC_Competency_Matrix_v1.md
     - AECI_Maintenance_Acceptance_Test_Catalog_v1.md
+    - AECI_Maintenance_Operational_Workflow_Acceptance_Addendum_v1.md
+    - AECI_Security_Forms_Field_Blast_Acceptance_Addendum_v1.md
+    - AECI_Maintenance_Document_Governance_v1.md
     - DDE_AECI_Operations_Pack_Config_Spec.md
     - DDE_AECI_Zimbabwe_Customer_Research.md
     - DDE_Maintenance_Intelligence_ERP_Master_Plan_v2.md

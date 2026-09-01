@@ -1,0 +1,252 @@
+schema_version: 1
+pack: aeci-maintenance
+inheritance_policy:
+  source: DDE_Maintenance_Intelligence_ERP_Master_Plan_v2.md
+  default: inherit_all_applicable
+  silence_is_exclusion: false
+  exclusion_requires:
+    - source_capability
+    - rationale
+    - safety_compliance_impact
+    - owner
+    - approval
+    - review_date
+  protected_domains:
+    - safety
+    - legal_compliance
+    - evidence
+    - competency
+    - maintenance_quality
+    - auditability
+
+operating_loop:
+  - sense
+  - understand
+  - assess_risk
+  - predict
+  - plan
+  - resource
+  - make_safe
+  - execute
+  - verify
+  - measure_outcome
+  - learn
+  - optimise
+
+capability_domains:
+  asset_component_registry:
+    phase: A
+    required: true
+  defects_inspections:
+    phase: B
+    required: true
+  digital_job_card_packs:
+    phase: B
+    required: true
+    bundle:
+      - work_identity
+      - asset_context
+      - controlled_procedure
+      - job_plan
+      - risk_assessment
+      - ppe_requirements
+      - permit_requirements
+      - loto_isolation
+      - competency_requirements
+      - tools_test_equipment
+      - parts_consumables
+      - drawings_manuals
+      - evidence_prompts
+      - measurements_limits
+      - quality_hold_points
+      - functional_test
+      - return_to_service
+      - follow_up_verification
+    revision_pinned: true
+    offline_required: true
+  work_management:
+    phase: B
+    required: true
+  planning_scheduling:
+    phase: C
+    required: true
+  shift_handover:
+    phase: C
+    required: true
+  hira_jsa_risk:
+    phase: B
+    required: true
+  permits:
+    phase: B
+    required: true
+  loto_isolation:
+    phase: B
+    required: true
+    physical_state_not_proven_by_digital_state: true
+  ppe_control:
+    phase: B
+    required: true
+  competency_authorization:
+    phase: A
+    required: true
+    separate_from_rbac: true
+  tools_test_equipment:
+    phase: D
+    required: true
+    controls:
+      - register
+      - custody
+      - reservation
+      - issue_return
+      - inspection
+      - toolbox_audit
+      - calibration
+      - quarantine
+      - loss_damage
+      - out_of_tolerance_impact_reconstruction
+  stores_inventory:
+    phase: D
+    required: true
+    ledgered: true
+  procurement:
+    phase: D
+    required: true
+  workshop_repairables:
+    phase: D
+    required: true
+    preserve_genealogy: true
+  quality_assurance:
+    phase: B
+    required: true
+  return_to_service_verification:
+    phase: B
+    required: true
+    execution_complete_is_not_verified: true
+  rework_management:
+    phase: B
+    required: true
+    adjudication_required_before_individual_attribution: true
+  recurring_breakdowns:
+    phase: E
+    required: true
+    configurable_thresholds: true
+  bad_actor_management:
+    phase: E
+    required: true
+  reliability_rca_fmea:
+    phase: E
+    required: true
+  maintenance_induced_failure:
+    phase: E
+    required: true
+    causal_review_required: true
+  no_fault_found:
+    phase: E
+    required: true
+  technician_kpi_performance:
+    phase: C
+    required: true
+    principles:
+      - explainable
+      - context_aware
+      - difficulty_normalized
+      - controllable_delay_normalized
+      - team_individual_attribution
+      - safety_incentive_protected
+      - suspected_rework_not_counted_before_adjudication
+      - coaching_oriented
+  supervisor_team_performance:
+    phase: C
+    required: true
+  controlled_documents:
+    phase: A
+    required: true
+  engineering_change:
+    phase: E
+    required: true
+  fleet_statutory_compliance:
+    phase: A
+    required: true
+  customer_sla:
+    phase: F
+    required: true
+  blast_support_readiness:
+    phase: F
+    required: true
+  condition_monitoring:
+    phase: G
+    required: true
+  ot_edge_integrations:
+    phase: G
+    required: true
+  maintenance_control_centre:
+    phase: C
+    required: true
+  rag_ai_copilots:
+    phase: H
+    required: true
+    restrictions:
+      - cannot_assert_physical_isolation
+      - cannot_approve_hazardous_work
+      - cannot_override_legal_safety_stops
+      - cannot_invent_controlled_technical_values
+      - must_respect_acl
+      - technical_guidance_requires_current_applicable_sources
+  audit_evidence_reporting:
+    phase: A
+    required: true
+  offline_sync_conflicts:
+    phase: B
+    required: true
+    global_last_writer_wins: false
+  safe_field_device_behavior:
+    phase: B
+    required: true
+  technical_escalation_remote_support:
+    phase: B
+    required: true
+  knowledge_capture_learning:
+    phase: E
+    required: true
+  management_reliability_analytics:
+    phase: E
+    required: true
+
+cross_domain_rules:
+  - id: RULE-001
+    text: Safety prerequisites precede hazardous execution.
+  - id: RULE-002
+    text: RBAC permission does not equal technical competence or authorization.
+  - id: RULE-003
+    text: Released work packs pin controlled revisions and never silently mutate safety-critical content.
+  - id: RULE-004
+    text: Work execution completion does not equal successful verified repair.
+  - id: RULE-005
+    text: Repeat failures and rework remain explicitly linked to prior work.
+  - id: RULE-006
+    text: Rework requires adjudication before individual performance attribution.
+  - id: RULE-007
+    text: Technician KPIs are context and difficulty aware and must not reward unsafe speed.
+  - id: RULE-008
+    text: Controlled tools and instruments carry custody, inspection and calibration status.
+  - id: RULE-009
+    text: Inventory is movement-ledger based.
+  - id: RULE-010
+    text: Offline evidence is first class and retries are idempotent.
+  - id: RULE-011
+    text: AI is advisory and cannot override physical, legal or safety authority.
+  - id: RULE-012
+    text: Acknowledging a handover or alert never silently closes the underlying operational object.
+  - id: RULE-013
+    text: Field learning proposes controlled changes but cannot directly modify approved procedures.
+
+acceptance_sources:
+  - AECI_Maintenance_Acceptance_Test_Catalog_v1.md
+  - AECI_Maintenance_Operational_Workflow_Acceptance_Addendum_v1.md
+
+required_golden_flows:
+  - planned_hazardous_mmu_repair
+  - breakdown_followed_by_rework
+  - recurring_pump_failure
+  - out_of_tolerance_instrument
+  - shift_crossing_with_active_isolation

@@ -1,4 +1,4 @@
-# AECI Maintenance — Document Governance & Source-of-Truth Map v1.1
+# AECI Maintenance — Document Governance & Source-of-Truth Map v1.2
 
 **Date:** 1 September 2026
 **Purpose:** Prevent contradictory implementation decisions across the growing DDE/AECI document set and establish authority for security, donor documents and AECI field-operation specializations.
@@ -16,8 +16,6 @@ AECI AMOS is a complete specialization of DDE Maintenance, not a thin subset. Ap
 ---
 
 # 2. Authority Order
-
-For AECI AMOS implementation, use this precedence:
 
 1. **Safety, security, data-protection and legal controls**
    - `AECI_Enterprise_Security_Data_Protection_Records_Standard_v1.md`
@@ -42,7 +40,7 @@ For AECI AMOS implementation, use this precedence:
    - `AECI_Maintenance_Acceptance_Test_Catalog_v1.md`
    - `AECI_Maintenance_Operational_Workflow_Acceptance_Addendum_v1.md`
    - `AECI_Security_Forms_Field_Blast_Acceptance_Addendum_v1.md`
-8. **Generic DDE master architecture/capability catalog**
+8. **Generic DDE shared architecture/capability catalog**
    - `DDE_Maintenance_Intelligence_ERP_Master_Plan_v2.md`
    - `DDE_Field_Experience_Rugged_Hardware_Spec.md`
    - `DDE_Modular_Platform_White_Label_Spec.md`
@@ -56,7 +54,25 @@ Research is evidence, not permission to override approved AECI policy or product
 
 ---
 
-# 3. Generic Capability Inheritance Rule
+# 3. External Benchmark Evidence vs Product Authority
+
+SAP SuccessFactors is used as an external **security benchmark**, not as AECI AMOS product authority and not as proof that AECI has enabled every available SuccessFactors option.
+
+The benchmark was re-verified against current SAP platform documentation on 1 September 2026 for capabilities including:
+
+- Role-Based Permissions;
+- Data Retention Time Management / retention policy controls;
+- read/change/general audit retention;
+- encryption at rest and advanced/customer-managed key options;
+- SAML SSO / SAP Cloud Identity Services;
+- MFA/conditional authentication capability;
+- mTLS/X.509 and Security Center integration trust controls.
+
+Implementation decisions still require AECI's actual identity/security/document-retention policies before production activation.
+
+---
+
+# 4. Generic Capability Inheritance Rule
 
 Every operationally applicable DDE Maintenance capability is inherited by AECI AMOS unless explicitly listed in a governed Exclusion Register. Silence is not exclusion.
 
@@ -64,7 +80,7 @@ An exclusion requires source capability, rationale, safety/compliance impact, ow
 
 ---
 
-# 4. Document Roles
+# 5. Document Roles
 
 | Document | Role | May define behavior? | Notes |
 |---|---|---:|---|
@@ -85,7 +101,7 @@ An exclusion requires source capability, rationale, safety/compliance impact, ow
 
 ---
 
-# 5. AECI Donor Documents as Controlled Sources
+# 6. AECI Donor Documents as Controlled Sources
 
 AECI-approved maintenance/safety/fleet/blast PDFs have two roles:
 
@@ -96,167 +112,87 @@ The donor PDF does not override safety/legal policy merely because text appears 
 
 ---
 
-# 6. Template Change Control
+# 7. Template Change Control
 
 For every donor PDF:
 
 `receive → immutable hash/retain → validate/sandbox → map schema/coordinates → reviewer verification → golden/fidelity testing → document-controller approval → publish`
 
-A change to any of these creates a new governed template revision:
-
-- donor PDF bytes;
-- field schema;
-- coordinate map;
-- controlled calculation/formula;
-- approval/signature structure;
-- material classification/retention rules;
-- output rendering rule that changes official appearance.
+A change to donor bytes, field schema, coordinate map, controlled formula, approval structure, classification/retention rule, or material render behavior creates a new governed template revision.
 
 Published revisions are immutable. Historical finalized records remain bound to their original revision.
 
 ---
 
-# 7. Security Policy Change Control
+# 8. Security Policy Change Control
 
-High-impact security changes require explicit audit and may require dual approval, including:
-
-- broadening cross-site/enterprise access;
-- enabling restricted data for offline storage or AI indexing;
-- reducing retention periods;
-- releasing legal/evidence hold;
-- changing high-risk export policy;
-- changing encryption/key-management posture;
-- granting privileged security administration;
-- changing audit retention/integrity configuration.
+High-impact changes require explicit audit and may require dual approval, including cross-site access, restricted offline/RAG enablement, retention reduction, legal-hold release, high-risk export policy, encryption/key posture, privileged administration and audit-integrity configuration.
 
 A feature PR cannot weaken an authoritative security requirement without a separately approved security decision record.
 
 ---
 
-# 8. Formula and Technical Value Governance
+# 9. Formula and Technical Value Governance
 
 AMOS must never invent controlled maintenance, quality or blasting values.
 
-Technical formulas/limits/tolerances used in execution or reporting require:
-
-- source document/procedure reference;
-- revision;
-- approving owner;
-- unit definition;
-- calculation/rounding definition;
-- effective date.
+Technical formulas/limits/tolerances require source document/procedure reference, revision, approving owner, unit definition, calculation/rounding definition and effective date.
 
 Missing approved source data produces `not configured / cannot calculate` rather than an inferred default.
 
 ---
 
-# 9. Discovery vs Production Configuration
+# 10. Discovery vs Production Configuration
 
 Customer research may seed templates but cannot silently become operational truth.
 
-Statuses:
+Statuses: `TEMPLATE_UNVERIFIED`, `DISCOVERY_CONFIRMED`, `CUSTOMER_APPROVED`, `PRODUCTION_ACTIVE`, `SUPERSEDED`.
 
-- `TEMPLATE_UNVERIFIED`
-- `DISCOVERY_CONFIRMED`
-- `CUSTOMER_APPROVED`
-- `PRODUCTION_ACTIVE`
-- `SUPERSEDED`
-
-Examples requiring customer evidence before `PRODUCTION_ACTIVE`:
-
-- exact asset models/BOMs;
-- current site rosters/postings;
-- PM intervals;
-- donor PDFs and revisions;
-- repair manuals/procedures;
-- trip-test/calibration limits;
-- blast/quality formulas and limits;
-- permit/LOTO forms;
-- statutory licence particulars;
-- competency requirements;
-- contract KPI definitions;
-- retention/classification rules;
-- hazardous-area device restrictions;
-- external system endpoints.
+Customer evidence is required before production activation for exact assets/BOMs, rosters/postings, PM intervals, donor PDFs, manuals/SOPs, trip-test/calibration values, blast formulas/limits, permit/LOTO forms, statutory particulars, competence, KPI definitions, retention/classification rules, hazardous-area device policy and external endpoints.
 
 ---
 
-# 10. Change Procedure
+# 11. Change Procedure
 
-Any material AMOS change must update affected artifacts:
+Material AMOS changes update affected product/master behavior, specialist security/domain spec, realization contract, RBAC/competency policy, acceptance tests, machine-readable pack(s) and customer configuration.
 
-1. product/master behavior;
-2. specialist security/domain spec;
-3. realization contract;
-4. RBAC/competency policy if permissions/eligibility changed;
-5. acceptance tests;
-6. machine-readable pack(s);
-7. AECI customer pack if customer-specific configuration changed.
-
-A change is material if it alters a state machine, safety/authorization requirement, data ownership/invariant, release gate, role authority, readiness semantics, donor record, calculation, offline behavior, external system-of-record boundary, AI authority or customer SLA behavior.
+Material includes changes to states, safety/authorization, data ownership, release gates, role authority, readiness, donor records, formulas, offline behavior, system-of-record boundaries, AI authority or SLA behavior.
 
 ---
 
-# 11. ADR Requirement
+# 12. ADR Requirement
 
-Create an Architecture Decision Record when a change:
-
-- changes a bounded-context boundary;
-- adds a new system of record;
-- changes canonical IDs/event semantics;
-- changes offline conflict strategy;
-- weakens/replaces an invariant;
-- introduces a new direct external dependency;
-- changes deployment/data-residency/security shape;
-- changes donor-record rendering architecture;
-- introduces autonomous AI action beyond current limits.
-
-ADR states context, decision, alternatives, consequences, migration impact, acceptance impact and rollback strategy where applicable.
+Create an ADR when changing bounded-context boundaries, systems of record, canonical IDs/events, offline conflict strategy, invariants, deployment/data residency/security, donor-render architecture, direct external dependencies or AI autonomy.
 
 ---
 
-# 12. Coding-Agent Read Order
-
-Any coding agent working on AECI Maintenance must read:
+# 13. Coding-Agent Read Order
 
 1. `AECI_Maintenance_Operations_System_Master_Plan_v1.md`
 2. `AECI_Enterprise_Security_Data_Protection_Records_Standard_v1.md`
 3. `AECI_Maintenance_DDE_Full_Capability_Inheritance_Spec_v1.md`
-4. relevant AECI domain specialization (donor PDF / field operations / operations pack)
+4. relevant AECI domain specialization
 5. `AECI_Maintenance_Implementation_Realisation_Pack_v1.md`
 6. relevant RBAC/acceptance documents
-7. exact implementation issue/epic
-8. existing code/ADRs/tests for the bounded context.
+7. implementation issue/epic
+8. existing code/ADRs/tests.
 
 The older AECI Operations Pack alone is never the complete feature scope.
 
 ---
 
-# 13. Acceptance Precedence
+# 14. Acceptance Precedence
 
-If a feature passes a happy-path demo but violates any applicable P0 scenario in the AECI acceptance catalogs, it is not complete.
-
-Security and safety P0 failures are release blockers regardless of product-demo status.
+If a feature passes a happy-path demo but violates any applicable P0 scenario, it is not complete. Security and safety P0 failures are release blockers.
 
 ---
 
-# 14. Required PR Metadata
+# 15. Required PR Metadata
 
-Every implementation PR identifies:
-
-- bounded context(s);
-- authoritative specification(s);
-- inherited DDE capability domains;
-- relevant acceptance IDs;
-- data classifications touched;
-- offline behavior impact;
-- security/export/RAG impact;
-- donor-template impact if any;
-- ADR/change decision;
-- external assumptions/fixtures used.
+Every implementation PR identifies bounded context(s), authoritative specs, inherited capabilities, acceptance IDs, data classifications, offline impact, security/export/RAG impact, donor-template impact, ADR/change decision and external assumptions/fixtures.
 
 ---
 
-# 15. Source-of-Truth Principle
+# 16. Source-of-Truth Principle
 
 AMOS may not drift into parallel undocumented logic. Product rules, donor mappings, authorization, formulas, workflows and acceptance gates belong in governed artifacts and machine-readable configuration where practical.
